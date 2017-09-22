@@ -62,7 +62,7 @@
               <addClasspath>true</addClasspath>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>Client.MainGUI</mainClass>
+              <mainClass>GUI.MainGUI</mainClass>
             </manifest>
 
             <!-- Set Class-Path for file access (configs) -->

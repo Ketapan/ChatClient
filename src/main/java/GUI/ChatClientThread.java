@@ -1,4 +1,4 @@
-package Simple;
+package GUI;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -6,14 +6,14 @@ import java.net.Socket;
 
 public class ChatClientThread extends Thread {
     private Socket socket = null;
-    private ChatClient client = null;
+    private MainGUI client = null;
     private DataInputStream streamIn = null;
 
     private boolean isListening = false;
 
     private byte[] messageBytes = null;
 
-    public void connect(ChatClient _client, Socket _socket)
+    public void connect(MainGUI _client, Socket _socket)
     {
         isListening = true;
         client = _client;

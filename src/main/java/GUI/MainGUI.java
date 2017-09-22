@@ -1,13 +1,25 @@
-package Simple;
+package GUI;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
+
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ChatClient implements Runnable {
+import static javax.swing.text.DefaultCaret.ALWAYS_UPDATE;
+
+public class MainGUI{
+
+    //Objekt Klassen
+    Messages msg = new Messages();
+
+    //Variablen
     private Socket socket = null;
     private Thread thread = null;
     private DataInputStream console = null;
@@ -20,24 +32,60 @@ public class ChatClient implements Runnable {
 
     byte[] message = null;
 
-    //TODO: Gucken was beim Server noch "offen" ist
+    //GUI
+    public static MainGUI publicGUI;
+    public JPanel panel;
+    public JButton btn_sendMessage;
+    public JTextArea textAreaMessages;
+    public JTextField textFieldUsername;
+    public JTextField textFieldClientMessage;
+    public JButton btn_anmelden;
 
 
-    public static void main(String args[]) {
-        //Meldet den Client an
-        ChatClient client = new ChatClient();
-        client.setServerName("127.0.0.1");
-        client.setServerPort(5555);
-        client.setUsername("iBims");
-        client.connectToServer();
+    public static void main(String[] args) {
+        MainGUI mainGUI = new MainGUI();
+        mainGUI.guiLoad();
     }
 
-    public void connectToServer()
-    {
+    public void guiLoad() {
+        //Try-Block = Windows Design
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        //Erzeuge die GUI
+        publicGUI = new MainGUI();
+        JFrame frame = new JFrame("Client");
+        frame.setContentPane(publicGUI.panel);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setPreferredSize(frame.getSize());
+        frame.setMinimumSize(frame.getSize());
+        frame.setVisible(true);
+
+        //Eigenschaften der Componenten festlegen
+        publicGUI.textAreaMessages.setEditable(false);
+        publicGUI.textAreaMessages.setWrapStyleWord(true);
+        publicGUI.textAreaMessages.setLineWrap(true);
+        DefaultCaret caret = (DefaultCaret) publicGUI.textAreaMessages.getCaret(); //Auto Scroll von dem Update Log
+        caret.setUpdatePolicy(ALWAYS_UPDATE);
+
+        publicGUI.btn_sendMessage.setEnabled(false);
+
+    }
+
+    public void appendTextMessages(String message) {
+        publicGUI.textAreaMessages.append(message + "\n");
+    }
+
+    public void connectToServer() {
         //Stellt verbindung mit dem Server her und startet den In-Output DataStream
         System.out.println("Connect... Please wait");
-        try
-        {
+        try {
             socket = new Socket(getServerName(), getServerPort());
             System.out.println("Connected: " + socket);
             start();
@@ -51,12 +99,10 @@ public class ChatClient implements Runnable {
         }
     }
 
-    public void reconnect(String serverName, Integer serverPort, String username)
-    {
+    public void reconnect(String serverName, Integer serverPort, String username) {
         //Falls der Server nicht zu erreichen ist wird immer wieder versucht bis der Server erreichbar ist
         //Hat keine Abbruch bedingung mit Absicht
         //Könnte man eine rein machen wenn der server beim zum beispiel 30ten versuch immer noch nicht erreichbar ist
-        ChatClient cc = new ChatClient();
         ChatClientThread cct = new ChatClientThread();
 
         if (thread != null) {
@@ -67,10 +113,12 @@ public class ChatClient implements Runnable {
             console = null;
             streamOut = null;
             client = null;
+            publicGUI.btn_anmelden.setEnabled(true);
+            publicGUI.btn_sendMessage.setEnabled(false);
             cct.reset();
-            cc.setServerName(serverName);
-            cc.setServerPort(serverPort);
-            cc.setUsername(username);
+            publicGUI.setServerName(serverName);
+            publicGUI.setServerPort(serverPort);
+            publicGUI.setUsername(username);
         }
         try {
             if (console != null) console.close();
@@ -80,32 +128,28 @@ public class ChatClient implements Runnable {
             System.out.println("Error closing ...");
         }
 
-        for(int i = 0; i < 5; i++)
-        {
+        for (int i = 0; i < 5; i++) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        cc.setServerName(serverName);
-        cc.setServerPort(serverPort);
-        cc.setUsername(username);
-        cc.connectToServer();
+        publicGUI.setServerName(serverName);
+        publicGUI.setServerPort(serverPort);
+        publicGUI.setUsername(username);
+        publicGUI.connectToServer();
     }
 
-    public void run() {
-        //Die bytes werden verschickt
-        while (thread != null) {
-            try {
-                message = console.readLine().getBytes();
-                streamOut.writeInt(message.length);
-                streamOut.write(message);
-                streamOut.flush();
-            } catch (IOException ioe) {
-                System.out.println("Sending error: " + ioe.getMessage());
-                stop();
-            }
+    public void sendeNachricht() {
+        try {
+            message = textFieldClientMessage.getText().getBytes();
+            streamOut.writeInt(message.length);
+            streamOut.write(message);
+            streamOut.flush();
+        } catch (IOException e) {
+            msg.msgbox("Sending error: " + e.toString(), "ERROR", "ERROR");
+            stop();
         }
     }
 
@@ -114,18 +158,15 @@ public class ChatClient implements Runnable {
         if (msg.equals("/bye")) {
             System.out.println("Good bye. Press RETURN to exit ...");
             stop();
-        } else if (msg.equalsIgnoreCase("/pic"))
-        {
+        } else if (msg.equalsIgnoreCase("/pic")) {
             // convert byte array back to BufferedImage
             InputStream in = new ByteArrayInputStream(msg.getBytes());
             BufferedImage bImageFromConvert = ImageIO.read(in);
-            if(bImageFromConvert != null)
-            {
+            if (bImageFromConvert != null) {
                 ImageIO.write(bImageFromConvert, "PNG", new File("C:\\Users\\aaron\\Desktop\\asdfasdfawsdfasdfasdgdfshg.png"));
             }
-        }
-        else {
-            System.out.println(msg);
+        } else {
+            publicGUI.textAreaMessages.append(msg);
         }
     }
 
@@ -136,8 +177,8 @@ public class ChatClient implements Runnable {
         if (thread == null) {
             client = new ChatClientThread();
             client.connect(this, socket);
-            thread = new Thread(this);
-            thread.start();
+//            thread = new Thread((Runnable) this);
+//            thread.start();
         }
     }
 
@@ -187,6 +228,33 @@ public class ChatClient implements Runnable {
         }
     }
 
+    //Listener
+    public MainGUI() {
+        btn_anmelden.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (publicGUI.textFieldUsername.getText().equalsIgnoreCase("")) {
+                    msg.msgbox("Gib ein Benutzername ein.", "Benutzername", "WARN");
+                } else {
+                    publicGUI.setServerName("127.0.0.1");
+                    publicGUI.setServerPort(5555);
+                    publicGUI.setUsername(publicGUI.textFieldUsername.getText());
+
+                    publicGUI.btn_anmelden.setEnabled(false);
+                    publicGUI.btn_sendMessage.setEnabled(true);
+                    publicGUI.connectToServer();
+                }
+            }
+        });
+
+        btn_sendMessage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendeNachricht();
+            }
+        });
+    }
+
     public String getServerName() {
         return serverName;
     }
@@ -210,33 +278,5 @@ public class ChatClient implements Runnable {
     public void setUsername(String username) {
         this.username = username;
     }
+
 }
-
-
-/**
- * bytes senden
- *
- * Zum Senden von bytes:
- *
- * byte[] message = ...
- * Socket socket = ...
- * DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
- *
- * dOut.writeInt(message.length); // write length of the message
- * dOut.write(message);
- **/
-
-/**
- * bytes empfangen
- *
- * Zum Empfangen von bytes:
- *
- * Socket socket = ...
- * DataInputStream dIn = new DataInputStream(socket.getInputStream());
- *
- * int length = dIn.readInt();                    // read length of incoming message
- * if(length>0) {
- * byte[] message = new byte[length];
- * dIn.readFully(message, 0, message.length); // read the message
- * }
- **/
