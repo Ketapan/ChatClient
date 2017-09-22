@@ -40,6 +40,8 @@ public class MainGUI{
     public JTextField textFieldUsername;
     public JTextField textFieldClientMessage;
     public JButton btn_anmelden;
+    private JTextField textFieldIPAdresse;
+    private JTextField textFieldPort;
 
 
     public static void main(String[] args) {
@@ -75,6 +77,7 @@ public class MainGUI{
         caret.setUpdatePolicy(ALWAYS_UPDATE);
 
         publicGUI.btn_sendMessage.setEnabled(false);
+        publicGUI.textFieldClientMessage.setEnabled(false);
 
     }
 
@@ -233,16 +236,21 @@ public class MainGUI{
         btn_anmelden.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (publicGUI.textFieldUsername.getText().equalsIgnoreCase("")) {
-                    msg.msgbox("Gib ein Benutzername ein.", "Benutzername", "WARN");
-                } else {
-                    publicGUI.setServerName("127.0.0.1");
-                    publicGUI.setServerPort(5555);
-                    publicGUI.setUsername(publicGUI.textFieldUsername.getText());
+                String username = publicGUI.textFieldUsername.getText();
+                String ip = publicGUI.textFieldIPAdresse.getText();
+                Integer port = Integer.getInteger(publicGUI.textFieldPort.getText());
 
-                    publicGUI.btn_anmelden.setEnabled(false);
-                    publicGUI.btn_sendMessage.setEnabled(true);
-                    publicGUI.connectToServer();
+                if (username.equals("") && ip.equals("")) {
+                    msg.msgbox("Trag zuerst die IP-Adresse, Port und Benutzername ein.", "Benutzername", "WARN");
+                } else {
+//                    publicGUI.setServerName("127.0.0.1");
+//                    publicGUI.setServerPort(5555);
+//                    publicGUI.setUsername(publicGUI.textFieldUsername.getText());
+//
+//                    publicGUI.btn_anmelden.setEnabled(false);
+//                    publicGUI.btn_sendMessage.setEnabled(true);
+//                    publicGUI.connectToServer();
+                    msg.msgbox("abc", "abcede", "INFO");
                 }
             }
         });
