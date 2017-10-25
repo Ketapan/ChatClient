@@ -1,6 +1,7 @@
 package Prozess;
 
 import GUI.Main;
+import GUI.Message.HandleMessages;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -11,13 +12,12 @@ import java.util.ArrayList;
 import java.util.zip.ZipInputStream;
 
 public class ChatClientThread extends Thread {
+    HandleMessages handleMSG = new HandleMessages();
     private Socket socket = null;
     private Main client = null;
     private DataInputStream streamIn = null;
 
     private boolean isListening = false;
-
-    private byte[] messageBytes = null;
 
     public void connect(Main _client, Socket _socket)
     {
@@ -53,15 +53,16 @@ public class ChatClientThread extends Thread {
 
     public void run() {
         while (isListening) {
+            byte[] messageBytes = null;
             try {
                 int length = streamIn.readInt();
-                String messageAsString = "";
                 if (length > 0) {
                     messageBytes = new byte[length];
                     streamIn.readFully(messageBytes, 0, length);
-                    messageAsString = new String(messageBytes);
+//                    messageAsString = new String(messageBytes);
+                    handleMSG.messageHandling(messageBytes);
                 }
-                client.handle(messageAsString);
+//                client.handle(messageAsString);
             } catch (IOException ioe) {
                 Main.publicGUI.textAreaMessages.append("Listening error: " + ioe.getMessage());
 //                client.stop();

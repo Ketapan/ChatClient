@@ -237,6 +237,12 @@ public class Main {
     }
 
 
+    public static void appendTextMessage(String message){
+        //TODO: Methode in richtige Klasse verschieben
+        Main.publicGUI.textAreaMessages.append(message);
+    }
+
+
     //Listener
     public Main() {
         btn_anmelden.addActionListener(new ActionListener() {

@@ -3,11 +3,8 @@ package GUI.Message;
 import GUI.Main;
 
 import javax.swing.*;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class Messages {
 
@@ -38,37 +35,6 @@ public class Messages {
         Main.publicGUI.textAreaMessages.append(message + "\n");
     }
 
-    private byte[] zip(byte[] messageTo, byte[] message, byte[] type) throws IOException
-    {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        ZipOutputStream zip = new ZipOutputStream( output );
-
-        zip.setMethod( ZipOutputStream.DEFLATED );
-
-        ZipEntry entry = new ZipEntry("messageTO");
-        ZipEntry entry2 = new ZipEntry("message");
-        ZipEntry entry3 = new ZipEntry("type");
-
-        zip.putNextEntry( entry );
-        zip.write(messageTo);
-        zip.closeEntry();
-
-        zip.putNextEntry(entry2);
-        zip.write(message);
-        zip.closeEntry();
-
-        zip.putNextEntry(entry3);
-        zip.write(type);
-        zip.closeEntry();
-
-        byte[] bytes = output.toByteArray();
-
-        zip.close();
-        output.close();
-
-        return bytes;
-    }
-
     public static void sendMessage()
     {
         byte[] messageByte = null;
@@ -85,11 +51,14 @@ public class Messages {
         }
     }
 
-    public static void sendMessabeBytes(byte[] messageByte){
+    public static void send(String messageTo, String message, String messageTyp){
+        ZipMessage zipMSG = new ZipMessage();
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
         try {
-            streamOut.writeInt(messageByte.length);
-            streamOut.write(messageByte);
+            byte[] zippedBytes;
+            zippedBytes = zipMSG.zipAndSendBytes(messageTo.getBytes(), message.getBytes(), messageTyp.getBytes());
+            streamOut.writeInt(zippedBytes.length);
+            streamOut.write(zippedBytes);
             streamOut.flush();
             Main.publicGUI.textFieldClientMessage.setText("");
         } catch (IOException e) {
