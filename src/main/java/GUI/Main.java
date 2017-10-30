@@ -1,23 +1,29 @@
 package GUI;
 
-import javax.imageio.ImageIO;
+import GUI.Message.Messages;
+import Listener.AnmeldenActionListener;
+import Prozess.ChatClientThread;
+import Prozess.SpeziellAction;
+
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 import static javax.swing.text.DefaultCaret.ALWAYS_UPDATE;
 
-public class MainGUI{
+public class Main {
 
-    //Objekt Klassen
-    Messages msg = new Messages();
+    //TODO: Reconnect Thread schreiben damit sich nicht die GUI aufhängt
 
     //Variablen
     private Socket socket = null;
@@ -30,26 +36,25 @@ public class MainGUI{
     private Integer serverPort = 0;
     private String username = "";
 
-    byte[] message = null;
-
     //GUI
-    public static MainGUI publicGUI;
+    public static Main publicGUI;
     public JPanel panel;
-    public JButton btn_sendMessage;
     public JTextArea textAreaMessages;
     public JTextField textFieldUsername;
     public JTextField textFieldClientMessage;
     public JButton btn_anmelden;
-    private JTextField textFieldIPAdresse;
-    private JTextField textFieldPort;
-
+    public JTextField textFieldIPAdresse;
+    public JTextField textFieldPort;
+    public DefaultListModel<String> userlistModel = new DefaultListModel<>();
+    public JList<String> userList;
+    private JButton btn_clearSelectionUserlist;
 
     public static void main(String[] args) {
-        MainGUI mainGUI = new MainGUI();
-        mainGUI.guiLoad();
+        Main main = new Main();
+        main.guiLoad();
     }
-
-    public void guiLoad() {
+	
+	public void guiLoad() {
         //Try-Block = Windows Design
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -59,8 +64,9 @@ public class MainGUI{
         }
 
         //Erzeuge die GUI
-        publicGUI = new MainGUI();
+        publicGUI = new Main();
         JFrame frame = new JFrame("Client");
+//        frame.setPreferredSize(new Dimension(700,450));
         frame.setContentPane(publicGUI.panel);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
@@ -69,32 +75,42 @@ public class MainGUI{
         frame.setMinimumSize(frame.getSize());
         frame.setVisible(true);
 
+        //Für Testzwecke IP, PORT, USERNAME bereits eingetragen
+        publicGUI.textFieldIPAdresse.setText("127.0.0.1");
+        publicGUI.textFieldPort.setText("5555");
+        publicGUI.textFieldUsername.setText("deiMudda");
+
         //Eigenschaften der Componenten festlegen
         publicGUI.textAreaMessages.setEditable(false);
         publicGUI.textAreaMessages.setWrapStyleWord(true);
         publicGUI.textAreaMessages.setLineWrap(true);
-        DefaultCaret caret = (DefaultCaret) publicGUI.textAreaMessages.getCaret(); //Auto Scroll von dem Update Log
+        DefaultCaret caret = (DefaultCaret) publicGUI.textAreaMessages.getCaret(); //Auto Scroll
         caret.setUpdatePolicy(ALWAYS_UPDATE);
 
-        publicGUI.btn_sendMessage.setEnabled(false);
+        publicGUI.userList.setModel(publicGUI.userlistModel);
+        publicGUI.userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        publicGUI.userList.setLayoutOrientation(JList.VERTICAL);
+        publicGUI.userList.setVisibleRowCount(-1);
+
         publicGUI.textFieldClientMessage.setEnabled(false);
 
-    }
-
-    public void appendTextMessages(String message) {
-        publicGUI.textAreaMessages.append(message + "\n");
+        frame.setVisible(true);
     }
 
     public void connectToServer() {
         //Stellt verbindung mit dem Server her und startet den In-Output DataStream
-        System.out.println("Connect... Please wait");
+        Messages.appendTextMessage("Connect... Please wait");
         try {
             socket = new Socket(getServerName(), getServerPort());
-            System.out.println("Connected: " + socket);
+            Messages.appendTextMessage("Connected: " + socket);
             start();
             byte[] byteUsername = username.getBytes();
             streamOut.writeInt(byteUsername.length);
             streamOut.write(byteUsername);
+
+//            Thread stThread = new Thread(speichernThread);
+//            stThread.start();
+
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -105,7 +121,7 @@ public class MainGUI{
     public void reconnect(String serverName, Integer serverPort, String username) {
         //Falls der Server nicht zu erreichen ist wird immer wieder versucht bis der Server erreichbar ist
         //Hat keine Abbruch bedingung mit Absicht
-        //Könnte man eine rein machen wenn der server beim zum beispiel 30ten versuch immer noch nicht erreichbar ist
+        //Man könnte eine rein machen wenn der server beim zum beispiel 30ten versuch immer noch nicht erreichbar ist
         ChatClientThread cct = new ChatClientThread();
 
         if (thread != null) {
@@ -117,7 +133,10 @@ public class MainGUI{
             streamOut = null;
             client = null;
             publicGUI.btn_anmelden.setEnabled(true);
-            publicGUI.btn_sendMessage.setEnabled(false);
+            publicGUI.textFieldClientMessage.setEnabled(false);
+            publicGUI.textFieldUsername.setEnabled(true);
+            publicGUI.textFieldPort.setEnabled(true);
+            publicGUI.textFieldIPAdresse.setEnabled(true);
             cct.reset();
             publicGUI.setServerName(serverName);
             publicGUI.setServerPort(serverPort);
@@ -128,15 +147,12 @@ public class MainGUI{
             if (streamOut != null) streamOut.close();
             if (socket != null) socket.close();
         } catch (IOException ioe) {
-            System.out.println("Error closing ...");
+            Messages.appendTextMessage("Error closing..." + ioe.getMessage());
         }
 
-        for (int i = 0; i < 5; i++) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        int z = 0;
+        for (int i = 0; i < 30000; i++) {
+            z++;
         }
         publicGUI.setServerName(serverName);
         publicGUI.setServerPort(serverPort);
@@ -144,32 +160,43 @@ public class MainGUI{
         publicGUI.connectToServer();
     }
 
-    public void sendeNachricht() {
-        try {
-            message = textFieldClientMessage.getText().getBytes();
-            streamOut.writeInt(message.length);
-            streamOut.write(message);
-            streamOut.flush();
-        } catch (IOException e) {
-            msg.msgbox("Sending error: " + e.toString(), "ERROR", "ERROR");
-            stop();
-        }
-    }
-
     public void handle(String msg) throws IOException {
         //Hier werden die ankommenden Nachrichten verarbeitet
         if (msg.equals("/bye")) {
-            System.out.println("Good bye. Press RETURN to exit ...");
-            stop();
-        } else if (msg.equalsIgnoreCase("/pic")) {
-            // convert byte array back to BufferedImage
-            InputStream in = new ByteArrayInputStream(msg.getBytes());
-            BufferedImage bImageFromConvert = ImageIO.read(in);
-            if (bImageFromConvert != null) {
-                ImageIO.write(bImageFromConvert, "PNG", new File("C:\\Users\\aaron\\Desktop\\asdfasdfawsdfasdfasdgdfshg.png"));
+            Messages.appendTextMessage("Good bye. Close in 2 Seconds...");
+//            stop();
+            try {
+                Thread.sleep(2000);
+                System.exit(0);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } else {
-            publicGUI.textAreaMessages.append(msg);
+        } else if (msg.startsWith("/pic")) {
+            String temp = msg;
+            temp = temp.substring(4, temp.length());
+            BufferedImage bImageFromConvert = SpeziellAction.base64StringToImg(temp);
+            if (bImageFromConvert != null) {
+                Toolkit toolkit = Toolkit.getDefaultToolkit();
+                Image img = toolkit.createImage(bImageFromConvert.getSource());
+                //Erzeuge die GUI
+                JFrame frame = new JFrame("Screenshot");
+                frame.getContentPane().add(new PicturePanel(img));
+                frame.setSize(800, 400);
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+            }
+        } else if (msg.startsWith("/addwho")) {
+            msg = msg.substring(7, msg.length());
+            publicGUI.userlistModel.addElement(msg);
+        } else if (msg.startsWith("/refreshList")) {
+            publicGUI.userlistModel.clear();
+        } else if(msg.equalsIgnoreCase("/vergeben")){
+            Messages.appendTextMessage("Username bereits vergeben");
+            Messages.appendTextMessage("Verbindung zum Server getrennt");
+            stop();
+        }
+        else {
+            Messages.appendTextMessage(msg);
         }
     }
 
@@ -195,70 +222,54 @@ public class MainGUI{
             if (streamOut != null) streamOut.close();
             if (socket != null) socket.close();
         } catch (IOException ioe) {
-            System.out.println("Error closing ...");
+            Messages.appendTextMessage("Error closing ..." + ioe.getMessage());
         }
+        publicGUI.btn_anmelden.setEnabled(true);
+
+        publicGUI.textFieldClientMessage.setEnabled(false);
+        publicGUI.textFieldUsername.setEnabled(true);
+        publicGUI.textFieldPort.setEnabled(true);
+        publicGUI.textFieldIPAdresse.setEnabled(true);
+
+        Messages.appendTextMessage("");
         client.close();
         client.stop();
     }
 
-    private void makeScreenshot() {
-        /*
-            Macht einen Screenshot wandelt diesen in Bytes um und schickt ihn an den Server
-            Problem:
-            -> Verarbeitung auf der Server seite funktioniert nicht richtig da die bytes des Screenshots auf dem gleichen Kanal ankommen wie normale "Nachrichten" bytes
-            -> Man müsste das "Paket" irgendwie markieren damit der Server den unterschied erkennt
-            -> Ähnlich wie bei den Privaten Nachrichten nur noch etwas mehr ausgearbeiteter und ohne das die bytes des Screenshots fehler enthalten
-            -> Zum beispiel durch etwas hinzufügen der bytes :D (hat nicht funktioniert)
-         */
-        try {
-            byte[] imageInByte;
-
-            Robot awt_robot = new Robot();
-            BufferedImage screenshot = awt_robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
-//            ImageIO.write(screenshot, "PNG", new File("C:\\Users\\aaron\\Desktop\\Entire_Screen.png"));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(screenshot, "PNG", baos);
-            baos.flush();
-            imageInByte = baos.toByteArray();
-            baos.close();
-
-            streamOut.writeInt(imageInByte.length);
-            streamOut.write(imageInByte);
-            streamOut.flush();
-
-        } catch (IOException | AWTException e) {
-            e.printStackTrace();
-        }
-    }
 
     //Listener
-    public MainGUI() {
+    public Main() {
         btn_anmelden.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = publicGUI.textFieldUsername.getText();
-                String ip = publicGUI.textFieldIPAdresse.getText();
-                Integer port = Integer.getInteger(publicGUI.textFieldPort.getText());
-
-                if (username.equals("") && ip.equals("")) {
-                    msg.msgbox("Trag zuerst die IP-Adresse, Port und Benutzername ein.", "Benutzername", "WARN");
-                } else {
-//                    publicGUI.setServerName("127.0.0.1");
-//                    publicGUI.setServerPort(5555);
-//                    publicGUI.setUsername(publicGUI.textFieldUsername.getText());
-//
-//                    publicGUI.btn_anmelden.setEnabled(false);
-//                    publicGUI.btn_sendMessage.setEnabled(true);
-//                    publicGUI.connectToServer();
-                    msg.msgbox("abc", "abcede", "INFO");
-                }
+                AnmeldenActionListener anmeldenListener = new AnmeldenActionListener();
+                anmeldenListener.anmelden();
             }
         });
 
-        btn_sendMessage.addActionListener(new ActionListener() {
+        btn_clearSelectionUserlist.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendeNachricht();
+                Main.publicGUI.userList.clearSelection();
+            }
+        });
+
+        textFieldClientMessage.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                if(e.getKeyCode() == KeyEvent.VK_ENTER){
+                    if (publicGUI.textFieldClientMessage.getText().equals("")) {
+                        Messages.msgbox("Gib zuerst eine Nachricht ein.", "Nachicht", "WARN");
+                    } else {
+                        if(publicGUI.userList.isSelectionEmpty())
+                        {
+                            Messages.sendMessage();
+                        } else {
+                            SpeziellAction.handleSendingPrivateMessages(publicGUI.textFieldClientMessage.getText());
+                        }
+                    }
+                }
             }
         });
     }
@@ -287,4 +298,7 @@ public class MainGUI{
         this.username = username;
     }
 
+    public DataOutputStream getStreamOut() {
+        return streamOut;
+    }
 }

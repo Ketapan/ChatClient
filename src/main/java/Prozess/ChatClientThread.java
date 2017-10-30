@@ -1,4 +1,6 @@
-package GUI;
+package Prozess;
+
+import GUI.Main;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -6,14 +8,14 @@ import java.net.Socket;
 
 public class ChatClientThread extends Thread {
     private Socket socket = null;
-    private MainGUI client = null;
+    private Main client = null;
     private DataInputStream streamIn = null;
 
     private boolean isListening = false;
 
     private byte[] messageBytes = null;
 
-    public void connect(MainGUI _client, Socket _socket)
+    public void connect(Main _client, Socket _socket)
     {
         isListening = true;
         client = _client;
@@ -50,21 +52,20 @@ public class ChatClientThread extends Thread {
             try {
                 int length = streamIn.readInt();
                 String messageAsString = "";
-                if(length > 0)
-                {
+                if (length > 0) {
                     messageBytes = new byte[length];
                     streamIn.readFully(messageBytes, 0, length);
                     messageAsString = new String(messageBytes);
                 }
                 client.handle(messageAsString);
-//                client.handle(streamIn.readUTF());
             } catch (IOException ioe) {
-                System.out.println("Listening error: " + ioe.getMessage());
+                Main.publicGUI.textAreaMessages.append("Listening error: " + ioe.getMessage());
 //                client.stop();
                 isListening = false;
                 client.reconnect(client.getServerName(), client.getServerPort(), client.getUsername());
                 break;
             }
+
         }
     }
 }
