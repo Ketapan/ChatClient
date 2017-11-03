@@ -28,4 +28,27 @@ public class UnzipMessage {
 
         return ergebnisListe;
     }
+
+    public byte[] unzipEntry2(byte[] pDaten) throws IOException
+    {
+        ArrayList<byte[]> byteListe = new ArrayList<>();
+        byte[] entry2 = null;
+        InputStream input = new ByteArrayInputStream(pDaten);
+        byte[] daten = new byte[2048];
+        ZipInputStream zip = new ZipInputStream(input);
+        int anzahl = 0;
+
+        while((zip.getNextEntry()) != null){
+            anzahl = zip.read(daten);
+            byte[] bla = new byte[anzahl];
+            System.arraycopy(daten, 0, bla, 0, anzahl);
+            byteListe.add(bla);
+        }
+
+        zip.close();
+        input.close();
+
+        entry2 = byteListe.get(1);
+        return entry2;
+    }
 }

@@ -57,14 +57,17 @@ public class ChatClientThread extends Thread {
                 int length = streamIn.readInt();
                 String messageAsString = "";
                 String messageType = "";
+                byte[] messageAsByte = null;
+
                 if (length > 0) {
                     messageBytes = new byte[length];
                     streamIn.readFully(messageBytes, 0, length);
                     messageList = unzipMSG.unzip(messageBytes);
+                    messageAsByte = unzipMSG.unzipEntry2(messageBytes);
                     messageAsString = messageList.get(1).toString();
                     messageType = messageList.get(2).toString();
                 }
-                client.handle(messageAsString, messageType);
+                client.handle(messageAsString, messageType, messageAsByte);
             } catch (IOException ioe) {
                 Main.publicGUI.textAreaMessages.append("Listening error: " + ioe.getMessage());
 //                client.stop();

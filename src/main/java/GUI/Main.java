@@ -158,7 +158,7 @@ public class Main {
         publicGUI.connectToServer();
     }
 
-    public void handle(String msg, String type) throws IOException {
+    public void handle(String msg, String type, byte[] messageAsByte) throws IOException {
         //Hier werden die ankommenden Nachrichten verarbeitet
         if (type.equals("bye")) {
             Messages.appendTextMessage("Good bye. Close in 2 Seconds...");
@@ -172,7 +172,7 @@ public class Main {
         } else if (type.equals("pic")) {
 
                 Toolkit toolkit = Toolkit.getDefaultToolkit();
-                Image img = toolkit.createImage(msg.getBytes());
+                Image img = toolkit.createImage(messageAsByte);
                 //Erzeuge die GUI
                 JFrame frame = new JFrame("Screenshot");
                 frame.getContentPane().add(new PicturePanel(img));
