@@ -9,8 +9,7 @@ import java.io.IOException;
 
 public class Messages {
 
-    public static void msgbox(String message, String title, String type)
-    {
+    public static void msgbox(String message, String title, String type){
         type = type.toUpperCase();
         switch(type)
         {
@@ -52,21 +51,6 @@ public class Messages {
         }
     }
 
-    public static void sendPrivateMessageBytes(byte[] messageByte){
-        DataOutputStream streamOut = Main.publicGUI.getStreamOut();
-        try{
-//            String temp = "-pm" + Main.publicGUI.userList.getSelectedValue();
-//            //-pmdeiMudda: abcdefg
-//            messageByte = temp.getBytes();
-            streamOut.writeInt(messageByte.length);
-            streamOut.write(messageByte);
-            streamOut.flush();
-            Main.publicGUI.textFieldClientMessage.setText("");
-        } catch (IOException e){
-            msgbox("Sending error: " + e.toString(), "ERROR", "ERROR");
-            Main.publicGUI.stop();
-        }
-    }
     public static void sendMessages(String messageByte,String type, String messageTo){
         switch (type){
             case "pm":
@@ -81,13 +65,10 @@ public class Messages {
         }
 
     }
+
     public static byte[] toByte(String equalType, String byteStrom){
         byte[] messageByte = null;
-        if (equalType.equals("pic")){
-
-        }else {
-            messageByte = byteStrom.getBytes();
-        }
+        messageByte = byteStrom.getBytes();
         return messageByte;
     }
 }

@@ -255,7 +255,7 @@ public class Main {
                     if (publicGUI.textFieldClientMessage.getText().equals("")) {
                         Messages.msgbox("Gib zuerst eine Nachricht ein.", "Nachicht", "WARN");
                     } else if (publicGUI.textFieldClientMessage.getText().startsWith("/pic")) {
-                        Messages.sendMessages("","pic",publicGUI.userList.getSelectedValue());
+                        Messages.sendMessages("null","pic",publicGUI.userList.getSelectedValue());
                     }else {
                         if(publicGUI.userList.isSelectionEmpty())
                         {
