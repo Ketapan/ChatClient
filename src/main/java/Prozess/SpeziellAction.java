@@ -1,8 +1,5 @@
 package Prozess;
 
-import GUI.Main;
-import GUI.Message.Messages;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;

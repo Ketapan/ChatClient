@@ -3,7 +3,6 @@ package GUI;
 import GUI.Message.Messages;
 import Listener.AnmeldenActionListener;
 import Prozess.ChatClientThread;
-import Prozess.SpeziellAction;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -12,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -172,21 +170,16 @@ public class Main {
                 e.printStackTrace();
             }
         } else if (type.equals("pic")) {
-            String temp = msg;
-            temp = temp.substring(4, temp.length());
-            BufferedImage bImageFromConvert = SpeziellAction.base64StringToImg(temp);
-            if (bImageFromConvert != null) {
+
                 Toolkit toolkit = Toolkit.getDefaultToolkit();
-                Image img = toolkit.createImage(bImageFromConvert.getSource());
+                Image img = toolkit.createImage(msg.getBytes());
                 //Erzeuge die GUI
                 JFrame frame = new JFrame("Screenshot");
                 frame.getContentPane().add(new PicturePanel(img));
                 frame.setSize(800, 400);
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
-            }
         } else if (type.equals("addWho")) {
-            msg = msg.substring(7, msg.length());
             publicGUI.userlistModel.addElement(msg);
         } else if (type.equals("refreshList")) {
             publicGUI.userlistModel.clear();
