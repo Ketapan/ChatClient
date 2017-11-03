@@ -52,23 +52,6 @@ public class Messages {
         }
     }
 
-    public static void sendPrivateMessage(){
-        byte[] messageByte = null;
-        DataOutputStream streamOut = Main.publicGUI.getStreamOut();
-        try{
-            String temp = "-pm" + Main.publicGUI.userList.getSelectedValue() + ": " + Main.publicGUI.textFieldClientMessage.getText();
-            //-pmdeiMudda: abcdefg
-            messageByte = temp.getBytes();
-            streamOut.writeInt(messageByte.length);
-            streamOut.write(messageByte);
-            streamOut.flush();
-            Main.publicGUI.textFieldClientMessage.setText("");
-        } catch (IOException e){
-            msgbox("Sending error: " + e.toString(), "ERROR", "ERROR");
-            Main.publicGUI.stop();
-        }
-    }
-
     public static void sendPrivateMessageBytes(byte[] messageByte){
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
         try{
@@ -87,23 +70,23 @@ public class Messages {
     public static void sendMessages(String messageByte,String type, String messageTo){
         switch (type){
             case "pm":
-                sendZipMessage(toByte(type,messageTo),toByte(type,messageByte), toByte("pm", type));
+                sendZipMessage(toByte(type,messageTo),toByte(type,messageByte), toByte(type,"pm"));
                 break;
             case "pic":
-                //SpeziellAction.makeScreenshot(messageTo,type,);
+                sendZipMessage(toByte(type,messageTo),SpeziellAction.makeScreenshot(),toByte(type,"pic"));
                 break;
             case "msg":
-                sendZipMessage(toByte(type,messageTo),toByte(type,messageByte), toByte("msg", type));
+                sendZipMessage(toByte(type,messageTo),toByte(type,messageByte), toByte(type,"msg"));
                 break;
         }
 
     }
-    public static byte[] toByte(String type, String messageOrPicture){
+    public static byte[] toByte(String equalType, String byteStrom){
         byte[] messageByte = null;
-        if (type.equals("pic")){
+        if (equalType.equals("pic")){
 
         }else {
-            messageByte = messageOrPicture.getBytes();
+            messageByte = byteStrom.getBytes();
         }
         return messageByte;
     }
