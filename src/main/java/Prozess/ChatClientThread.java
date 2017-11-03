@@ -1,10 +1,12 @@
 package Prozess;
 
 import GUI.Main;
+import GUI.Message.UnzipMessage;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class ChatClientThread extends Thread {
     private Socket socket = null;
@@ -50,14 +52,19 @@ public class ChatClientThread extends Thread {
     public void run() {
         while (isListening) {
             try {
+                ArrayList messageList;
+                UnzipMessage unzipMSG = new UnzipMessage();
                 int length = streamIn.readInt();
                 String messageAsString = "";
+                String messageType = "";
                 if (length > 0) {
                     messageBytes = new byte[length];
                     streamIn.readFully(messageBytes, 0, length);
-                    messageAsString = new String(messageBytes);
+                    messageList = unzipMSG.unzip(messageBytes);
+                    messageAsString = messageList.get(1).toString();
+                    messageType = messageList.get(2).toString();
                 }
-                client.handle(messageAsString);
+                client.handle(messageAsString, messageType);
             } catch (IOException ioe) {
                 Main.publicGUI.textAreaMessages.append("Listening error: " + ioe.getMessage());
 //                client.stop();

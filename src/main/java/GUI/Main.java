@@ -1,14 +1,12 @@
 package GUI;
 
 import GUI.Message.Messages;
-import GUI.Message.ZipMessage;
 import Listener.AnmeldenActionListener;
 import Prozess.ChatClientThread;
 import Prozess.SpeziellAction;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -162,9 +160,9 @@ public class Main {
         publicGUI.connectToServer();
     }
 
-    public void handle(String msg) throws IOException {
+    public void handle(String msg, String type) throws IOException {
         //Hier werden die ankommenden Nachrichten verarbeitet
-        if (msg.equals("/bye")) {
+        if (type.equals("bye")) {
             Messages.appendTextMessage("Good bye. Close in 2 Seconds...");
 //            stop();
             try {
@@ -173,7 +171,7 @@ public class Main {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } else if (msg.startsWith("/pic")) {
+        } else if (type.equals("pic")) {
             String temp = msg;
             temp = temp.substring(4, temp.length());
             BufferedImage bImageFromConvert = SpeziellAction.base64StringToImg(temp);
@@ -187,12 +185,12 @@ public class Main {
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
             }
-        } else if (msg.startsWith("/addwho")) {
+        } else if (type.equals("addWho")) {
             msg = msg.substring(7, msg.length());
             publicGUI.userlistModel.addElement(msg);
-        } else if (msg.startsWith("/refreshList")) {
+        } else if (type.equals("refreshList")) {
             publicGUI.userlistModel.clear();
-        } else if(msg.equalsIgnoreCase("/vergeben")){
+        } else if(type.equals("remove")){
             Messages.appendTextMessage("Username bereits vergeben");
             Messages.appendTextMessage("Verbindung zum Server getrennt");
             stop();
