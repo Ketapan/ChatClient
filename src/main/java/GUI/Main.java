@@ -1,12 +1,14 @@
 package GUI;
 
 import GUI.Message.Messages;
+import GUI.Message.ZipMessage;
 import Listener.AnmeldenActionListener;
 import Prozess.ChatClientThread;
 import Prozess.SpeziellAction;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -261,13 +263,15 @@ public class Main {
                 if(e.getKeyCode() == KeyEvent.VK_ENTER){
                     if (publicGUI.textFieldClientMessage.getText().equals("")) {
                         Messages.msgbox("Gib zuerst eine Nachricht ein.", "Nachicht", "WARN");
-                    } else {
+                    } else if (publicGUI.textFieldClientMessage.getText().startsWith("/pic")) {
+                        SpeziellAction.makeScreenshot();
+                    }else {
                         if(publicGUI.userList.isSelectionEmpty())
                         {
-//                            Messages.sendMessage();
-                            Messages.sendZipMessage("alle", publicGUI.textFieldClientMessage.getText(), "msg");
+                            Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg","alle");
                         } else {
-                            SpeziellAction.handleSendingPrivateMessages(publicGUI.textFieldClientMessage.getText());
+                            System.out.println(publicGUI.userList.getSelectedValue());
+                            Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg",publicGUI.userList.getSelectedValue());
                         }
                     }
                 }

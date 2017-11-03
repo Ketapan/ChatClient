@@ -15,7 +15,7 @@ import java.util.Base64;
 
 public class SpeziellAction {
 
-    private static void makeScreenshot() {
+    public static void makeScreenshot() {
         String temp = "";
         byte[] imageInByte = null;
         try {
@@ -70,4 +70,5 @@ public class SpeziellAction {
             Messages.sendPrivateMessage();
         }
     }
+
 }

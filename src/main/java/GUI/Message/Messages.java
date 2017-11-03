@@ -1,6 +1,7 @@
 package GUI.Message;
 
 import GUI.Main;
+import Prozess.SpeziellAction;
 
 import javax.swing.*;
 import java.io.DataOutputStream;
@@ -35,12 +36,12 @@ public class Messages {
         Main.publicGUI.textAreaMessages.append(message + "\n");
     }
 
-    public static void sendZipMessage(String messageTo, String message, String type){
+    public static void sendZipMessage(byte[] messageTo, byte[] message, byte[] type){
         byte[] messageByte = null;
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
         ZipMessage zipMSG = new ZipMessage();
         try {
-            messageByte = zipMSG.zipAndSendBytes(messageTo.getBytes(), message.getBytes(), type.getBytes());
+            messageByte = zipMSG.zipAndSendBytes(messageTo, message, type);
             streamOut.writeInt(messageByte.length);
             streamOut.write(messageByte);
             streamOut.flush();
@@ -98,5 +99,28 @@ public class Messages {
             msgbox("Sending error: " + e.toString(), "ERROR", "ERROR");
             Main.publicGUI.stop();
         }
+    }
+    public static void sendMessages(String messageByte,String type, String messageTo){
+        switch (type){
+            case "pm":
+                sendZipMessage(toByte(type,messageByte), toByte(type, type), toByte(type,messageTo));
+                break;
+            case "pic":
+                //SpeziellAction.makeScreenshot(messageTo,type,);
+                break;
+            case "msg":
+                sendZipMessage(toByte(type,messageByte), toByte(type, type), toByte(type,messageTo));
+                break;
+        }
+
+    }
+    public static byte[] toByte(String type, String messageOrPicture){
+        byte[] messageByte = null;
+        if (type.equals("pic")){
+
+        }else {
+            messageByte = messageOrPicture.getBytes();
+        }
+        return messageByte;
     }
 }
