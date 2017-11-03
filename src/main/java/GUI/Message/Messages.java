@@ -35,12 +35,12 @@ public class Messages {
         Main.publicGUI.textAreaMessages.append(message + "\n");
     }
 
-    public static void sendMessage()
-    {
+    public static void sendZipMessage(String messageTo, String message, String type){
         byte[] messageByte = null;
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
+        ZipMessage zipMSG = new ZipMessage();
         try {
-            messageByte = Main.publicGUI.textFieldClientMessage.getText().getBytes();
+            messageByte = zipMSG.zipAndSendBytes(messageTo.getBytes(), message.getBytes(), type.getBytes());
             streamOut.writeInt(messageByte.length);
             streamOut.write(messageByte);
             streamOut.flush();
@@ -51,14 +51,14 @@ public class Messages {
         }
     }
 
-    public static void send(String messageTo, String message, String messageTyp){
-        ZipMessage zipMSG = new ZipMessage();
+    public static void sendMessage()
+    {
+        byte[] messageByte = null;
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
         try {
-            byte[] zippedBytes;
-            zippedBytes = zipMSG.zipAndSendBytes(messageTo.getBytes(), message.getBytes(), messageTyp.getBytes());
-            streamOut.writeInt(zippedBytes.length);
-            streamOut.write(zippedBytes);
+            messageByte = Main.publicGUI.textFieldClientMessage.getText().getBytes();
+            streamOut.writeInt(messageByte.length);
+            streamOut.write(messageByte);
             streamOut.flush();
             Main.publicGUI.textFieldClientMessage.setText("");
         } catch (IOException e) {

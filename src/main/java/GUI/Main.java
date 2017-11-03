@@ -237,12 +237,6 @@ public class Main {
     }
 
 
-    public static void appendTextMessage(String message){
-        //TODO: Methode in richtige Klasse verschieben
-        Main.publicGUI.textAreaMessages.append(message);
-    }
-
-
     //Listener
     public Main() {
         btn_anmelden.addActionListener(new ActionListener() {
@@ -270,7 +264,8 @@ public class Main {
                     } else {
                         if(publicGUI.userList.isSelectionEmpty())
                         {
-                            Messages.sendMessage();
+//                            Messages.sendMessage();
+                            Messages.sendZipMessage("alle", publicGUI.textFieldClientMessage.getText(), "msg");
                         } else {
                             SpeziellAction.handleSendingPrivateMessages(publicGUI.textFieldClientMessage.getText());
                         }

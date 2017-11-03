@@ -38,14 +38,14 @@ public class HandleMessages {
                         e.printStackTrace();
                     }
                 } else {
-                    Main.appendTextMessage(message);
+                    Messages.appendTextMessage(message);
                 }
 
             } else {
-                Main.appendTextMessage("Fehler beim einlesen der Nachricht");
+                Messages.appendTextMessage("Fehler beim einlesen der Nachricht");
             }
         } catch (IOException e) {
-            Main.appendTextMessage(e.getLocalizedMessage());
+            Messages.appendTextMessage(e.getLocalizedMessage());
         }
     }
 
@@ -69,7 +69,7 @@ public class HandleMessages {
             zip.close();
             input.close();
         } else{
-            Main.appendTextMessage("Fehler beim Entpacken der Nachricht (byte == null)");
+            Messages.appendTextMessage("Fehler beim Entpacken der Nachricht (byte == null)");
         }
 
         return ergebnisListe;
