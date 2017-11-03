@@ -262,7 +262,7 @@ public class Main {
                     if (publicGUI.textFieldClientMessage.getText().equals("")) {
                         Messages.msgbox("Gib zuerst eine Nachricht ein.", "Nachicht", "WARN");
                     } else if (publicGUI.textFieldClientMessage.getText().startsWith("/pic")) {
-                        SpeziellAction.makeScreenshot();
+                        Messages.sendMessages("","pic",publicGUI.userList.getSelectedValue());
                     }else {
                         if(publicGUI.userList.isSelectionEmpty())
                         {

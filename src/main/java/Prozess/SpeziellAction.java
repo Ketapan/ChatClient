@@ -15,7 +15,7 @@ import java.util.Base64;
 
 public class SpeziellAction {
 
-    public static void makeScreenshot() {
+    public static byte[] makeScreenshot() {
         String temp = "";
         byte[] imageInByte = null;
         try {
@@ -28,16 +28,12 @@ public class SpeziellAction {
             baos.flush();
             imageInByte = baos.toByteArray();
             baos.close();
-//
-            temp = imgToBase64String(screenshot, "PNG");
-            temp = "-pm" + Main.publicGUI.userList.getSelectedValue() + ":-pic" + temp;
-            Messages.sendPrivateMessageBytes(temp.getBytes());
-
         } catch (AWTException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return imageInByte;
     }
 
     private static String imgToBase64String(final RenderedImage img, final String formatName)
@@ -62,13 +58,4 @@ public class SpeziellAction {
             throw new UncheckedIOException(ioe);
         }
     }
-
-    public static void handleSendingPrivateMessages(String message){
-        if(message.equalsIgnoreCase("-pic")){
-            makeScreenshot();
-        } else {
-            Messages.sendPrivateMessage();
-        }
-    }
-
 }
