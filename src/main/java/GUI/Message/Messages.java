@@ -52,22 +52,6 @@ public class Messages {
         }
     }
 
-    public static void sendMessage()
-    {
-        byte[] messageByte = null;
-        DataOutputStream streamOut = Main.publicGUI.getStreamOut();
-        try {
-            messageByte = Main.publicGUI.textFieldClientMessage.getText().getBytes();
-            streamOut.writeInt(messageByte.length);
-            streamOut.write(messageByte);
-            streamOut.flush();
-            Main.publicGUI.textFieldClientMessage.setText("");
-        } catch (IOException e) {
-            msgbox("Sending error: " + e.toString(), "ERROR", "ERROR");
-            Main.publicGUI.stop();
-        }
-    }
-
     public static void sendPrivateMessage(){
         byte[] messageByte = null;
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
@@ -103,13 +87,13 @@ public class Messages {
     public static void sendMessages(String messageByte,String type, String messageTo){
         switch (type){
             case "pm":
-                sendZipMessage(toByte(type,messageByte), toByte(type, type), toByte(type,messageTo));
+                sendZipMessage(toByte(type,messageTo),toByte(type,messageByte), toByte("pm", type));
                 break;
             case "pic":
                 //SpeziellAction.makeScreenshot(messageTo,type,);
                 break;
             case "msg":
-                sendZipMessage(toByte(type,messageByte), toByte(type, type), toByte(type,messageTo));
+                sendZipMessage(toByte(type,messageTo),toByte(type,messageByte), toByte("msg", type));
                 break;
         }
 
