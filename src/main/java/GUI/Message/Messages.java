@@ -1,13 +1,19 @@
 package GUI.Message;
 
 import GUI.Main;
+import Prozess.ChatClientThread;
 import Prozess.SpeziellAction;
+import com.sun.org.apache.xpath.internal.SourceTree;
+import MessageObject.Message;
 
 import javax.swing.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 public class Messages {
+
+    private ObjectOutputStream oos =null;
 
     public static void msgbox(String message, String title, String type){
         type = type.toUpperCase();
@@ -35,10 +41,12 @@ public class Messages {
         Main.publicGUI.textAreaMessages.append(message + "\n");
     }
 
+    /*
     public static void sendZipMessage(byte[] messageTo, byte[] message, byte[] type){
         byte[] messageByte = null;
         DataOutputStream streamOut = Main.publicGUI.getStreamOut();
         ZipMessage zipMSG = new ZipMessage();
+        System.out.println("Before zipping = " + message.length);
         try {
             messageByte = zipMSG.zipAndSendBytes(messageTo, message, type);
             streamOut.writeInt(messageByte.length);
@@ -50,7 +58,8 @@ public class Messages {
             Main.publicGUI.stop();
         }
     }
-
+    */
+/*
     public static void sendMessages(String messageByte,String type, String messageTo){
         switch (type){
             case "pm":
@@ -65,10 +74,21 @@ public class Messages {
         }
 
     }
+    */
 
     public static byte[] toByte(String equalType, String byteStrom){
         byte[] messageByte = null;
         messageByte = byteStrom.getBytes();
         return messageByte;
+    }
+
+    public static void sendObjectStream(Message msg){
+        ObjectOutputStream streamOut = Main.publicGUI.getStreamOut();
+        try {
+            streamOut.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

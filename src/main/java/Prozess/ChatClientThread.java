@@ -5,13 +5,15 @@ import GUI.Message.UnzipMessage;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class ChatClientThread extends Thread {
     private Socket socket = null;
     private Main client = null;
-    private DataInputStream streamIn = null;
+    //private DataInputStream streamIn = null;
+    private ObjectOutputStream streamIn =null;
 
     private boolean isListening = false;
 
@@ -28,7 +30,8 @@ public class ChatClientThread extends Thread {
 
     public void open() {
         try {
-            streamIn = new DataInputStream(socket.getInputStream());
+            streamIn = new ObjectOutputStream(socket.getOutputStream());
+            //streamIn = new DataInputStream(socket.getInputStream());
         } catch (IOException ioe) {
             System.out.println("Error getting input stream: " + ioe);
             client.stop();
@@ -54,14 +57,14 @@ public class ChatClientThread extends Thread {
             try {
                 ArrayList messageList;
                 UnzipMessage unzipMSG = new UnzipMessage();
-                int length = streamIn.readInt();
+                //int length = streamIn.readInt();
                 String messageAsString = "";
                 String messageType = "";
                 byte[] messageAsByte = null;
 
-                if (length > 0) {
-                    messageBytes = new byte[length];
-                    streamIn.readFully(messageBytes, 0, length);
+                if (streamIn != null) {
+                    //messageBytes = new byte[length];
+                    //streamIn.readFully(messageBytes, 0, length);
                     messageList = unzipMSG.unzip(messageBytes);
                     messageAsByte = unzipMSG.unzipEntry2(messageBytes);
                     messageAsString = messageList.get(1).toString();

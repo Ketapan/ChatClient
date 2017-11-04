@@ -1,8 +1,9 @@
 package GUI;
-
+import MessageObject.Message;
 import GUI.Message.Messages;
 import Listener.AnmeldenActionListener;
 import Prozess.ChatClientThread;
+//import sun.plugin2.message.Message;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -11,9 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -26,9 +25,12 @@ public class Main {
     //Variablen
     private Socket socket = null;
     private Thread thread = null;
-    private DataInputStream console = null;
-    private DataOutputStream streamOut = null;
+    //private DataInputStream console = null;
+    //private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
+
+    private ObjectOutputStream streamOut = null;
+    private ObjectInputStream streamIn = null;
 
     private String serverName = "";
     private Integer serverPort = 0;
@@ -127,7 +129,7 @@ public class Main {
             thread.interrupt();
             socket = null;
             thread = null;
-            console = null;
+            streamIn = null;
             streamOut = null;
             client = null;
             publicGUI.btn_anmelden.setEnabled(true);
@@ -141,7 +143,7 @@ public class Main {
             publicGUI.setUsername(username);
         }
         try {
-            if (console != null) console.close();
+            if (streamIn != null) streamIn.close();
             if (streamOut != null) streamOut.close();
             if (socket != null) socket.close();
         } catch (IOException ioe) {
@@ -195,8 +197,10 @@ public class Main {
 
     public void start() throws IOException {
         //Erstellt den DataInput und DataOutput Stream
-        console = new DataInputStream(System.in);
-        streamOut = new DataOutputStream(socket.getOutputStream());
+        //console = new DataInputStream(System.in);
+        streamIn = new ObjectInputStream(System.in);
+        streamOut = new ObjectOutputStream(socket.getOutputStream());
+        //streamOut = new DataOutputStream(socket.getOutputStream());
         if (thread == null) {
             client = new ChatClientThread();
             client.connect(this, socket);
@@ -211,7 +215,7 @@ public class Main {
             thread = null;
         }
         try {
-            if (console != null) console.close();
+            if (streamIn != null) streamIn.close();
             if (streamOut != null) streamOut.close();
             if (socket != null) socket.close();
         } catch (IOException ioe) {
@@ -255,14 +259,17 @@ public class Main {
                     if (publicGUI.textFieldClientMessage.getText().equals("")) {
                         Messages.msgbox("Gib zuerst eine Nachricht ein.", "Nachicht", "WARN");
                     } else if (publicGUI.textFieldClientMessage.getText().startsWith("/pic")) {
-                        Messages.sendMessages("null","pic",publicGUI.userList.getSelectedValue());
+                        //Messages.sendMessages("null","pic",publicGUI.userList.getSelectedValue());
                     }else {
                         if(publicGUI.userList.isSelectionEmpty())
                         {
-                            Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg","alle");
+                            Image img = null;
+                            Message msg = new Message("hallo","alle", "d", img);
+                            Messages.sendObjectStream(msg);
+                            //Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg","alle");
                         } else {
                             System.out.println(publicGUI.userList.getSelectedValue());
-                            Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg",publicGUI.userList.getSelectedValue());
+                            //Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg",publicGUI.userList.getSelectedValue());
                         }
                     }
                 }
@@ -294,7 +301,7 @@ public class Main {
         this.username = username;
     }
 
-    public DataOutputStream getStreamOut() {
+    public ObjectOutputStream getStreamOut() {
         return streamOut;
     }
 }
