@@ -3,7 +3,6 @@ import MessageObject.Message;
 import GUI.Message.Messages;
 import Listener.AnmeldenActionListener;
 import Prozess.ChatClientThread;
-//import sun.plugin2.message.Message;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
