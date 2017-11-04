@@ -170,7 +170,6 @@ public class Main {
                 e.printStackTrace();
             }
         } else if (type.equals("pic")) {
-
                 Toolkit toolkit = Toolkit.getDefaultToolkit();
                 Image img = toolkit.createImage(messageAsByte);
                 //Erzeuge die GUI
@@ -259,10 +258,11 @@ public class Main {
                     }else {
                         if(publicGUI.userList.isSelectionEmpty())
                         {
-                            Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg","alle");
+                            Messages.sendMessages(publicGUI.getUsername() + ": " + publicGUI.textFieldClientMessage.getText(),"msg","alle");
                         } else {
                             System.out.println(publicGUI.userList.getSelectedValue());
-                            Messages.sendMessages(publicGUI.textFieldClientMessage.getText(),"msg",publicGUI.userList.getSelectedValue());
+                            publicGUI.textAreaMessages.append(publicGUI.getUsername() + ": " + publicGUI.textFieldClientMessage.getText());
+                            Messages.sendMessages(publicGUI.getUsername() + ": " + publicGUI.textFieldClientMessage.getText(),"msg",publicGUI.userList.getSelectedValue());
                         }
                     }
                 }
